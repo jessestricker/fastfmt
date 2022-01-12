@@ -1,0 +1,19 @@
+Language: Cpp
+Standard: Latest
+
+BasedOnStyle: Google
+
+ColumnLimit: 120
+NamespaceIndentation: All
+AccessModifierOffset: -2
+AllowShortFunctionsOnASingleLine: None
+FixNamespaceComments: false
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '\.h(pp)?>$'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 3

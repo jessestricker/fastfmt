@@ -1,0 +1,4 @@
+autosort: true
+additional_commands:
+  cpmaddpackage:
+    spelling: CPMAddPackage
