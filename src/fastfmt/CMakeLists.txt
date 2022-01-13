@@ -1,5 +1,5 @@
 # library target
-add_library(fastfmt STATIC detail.cpp fastfmt.cpp)
+add_library(fastfmt STATIC fastfmt.cpp)
 add_library(fastfmt::fastfmt ALIAS fastfmt)
 target_include_directories(fastfmt PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_compile_features(fastfmt PUBLIC cxx_std_20)

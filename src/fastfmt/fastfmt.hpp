@@ -4,38 +4,58 @@
 #include <string>
 #include <string_view>
 
-#include <fastfmt/detail.hpp>
+#include <fastfmt/detail/concepts.hpp>
+#include <fastfmt/detail/output_arg.hpp>
 
 namespace fastfmt {
+  /*
+   * integer output argument factories
+   */
+
   template <detail::integer Int>
   constexpr auto bin(Int value) noexcept {
-    return detail::integer_arg<Int, 2>{value};
+    return detail::int_output_arg<Int>{.value = value, .base = 2};
   }
 
   template <detail::integer Int>
   constexpr auto oct(Int value) noexcept {
-    return detail::integer_arg<Int, 8>{value};
+    return detail::int_output_arg<Int>{.value = value, .base = 8};
   }
 
   template <detail::integer Int>
   constexpr auto dec(Int value) noexcept {
-    return detail::integer_arg<Int, 10>{value};
+    return detail::int_output_arg<Int>{.value = value, .base = 10};
   }
 
   template <detail::integer Int>
   constexpr auto hex(Int value) noexcept {
-    return detail::integer_arg<Int, 16>{value};
+    return detail::int_output_arg<Int>{.value = value, .base = 16};
+  }
+
+  /*
+   * floating-point output argument factories
+   */
+
+  template <detail::floating_point Float>
+  constexpr auto general(Float value, unsigned precision = 0) {
+    return detail::float_output_arg<Float>{
+        .value = value, .format = std::chars_format::general, .precision = precision};
   }
 
   template <detail::floating_point Float>
   constexpr auto fixed(Float value, unsigned precision = 0) {
-    return detail::float_arg<Float>{value, std::chars_format::fixed, precision};
+    return detail::float_output_arg<Float>{.value = value, .format = std::chars_format::fixed, .precision = precision};
   }
 
   template <detail::floating_point Float>
   constexpr auto scientific(Float value, unsigned precision = 0) {
-    return detail::float_arg<Float>{value, std::chars_format::scientific, precision};
+    return detail::float_output_arg<Float>{
+        .value = value, .format = std::chars_format::scientific, .precision = precision};
   }
+
+  /*
+   * formatting output buffer
+   */
 
   class output {
   public:
@@ -62,14 +82,14 @@ namespace fastfmt {
 
     template <detail::floating_point Float>
     output& operator<<(Float f) {
-      return *this << detail::float_arg{f, std::chars_format::general, 0};
+      return *this << general(f);
     }
 
-    // format appendable args (see detail.hpp)
+    // format output args
 
-    template <detail::appendable Appendable>
-    output& operator<<(Appendable appendable) {
-      appendable.append_to(buffer_);
+    template <detail::output_arg OutputArg>
+    output& operator<<(const OutputArg& arg) {
+      arg.append_to(buffer_);
       return *this;
     }
 
