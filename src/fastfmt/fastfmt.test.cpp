@@ -1,5 +1,7 @@
 #include <cstdint>
+#include <numbers>
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <fastfmt/fastfmt.hpp>
 
@@ -79,6 +81,20 @@ TEST_CASE("formatting integer, base 16") {
   FASTFMT_CHECK(ff::hex(lim<std::uint8_t>::max()), "ff");
   FASTFMT_CHECK(ff::hex(lim<std::int8_t>::min()), "-80");
   FASTFMT_CHECK(ff::hex(lim<std::int8_t>::max()), "7f");
+}
+
+TEMPLATE_TEST_CASE("formatting floating point, fixed", "", float, double, long double) {
+  static constexpr auto pi = std::numbers::pi_v<TestType>;
+  FASTFMT_CHECK(ff::fixed(pi, 2), "3.14");
+  FASTFMT_CHECK(ff::fixed(pi, 4), "3.1416");
+  FASTFMT_CHECK(ff::fixed(pi, 6), "3.141593");
+}
+
+TEMPLATE_TEST_CASE("formatting floating point, scientific", "", float, double, long double) {
+  static constexpr auto egamma = std::numbers::egamma_v<TestType>;
+  FASTFMT_CHECK(ff::scientific(egamma, 2), "5.77e-01");
+  FASTFMT_CHECK(ff::scientific(egamma, 4), "5.7722e-01");
+  FASTFMT_CHECK(ff::scientific(egamma, 6), "5.772157e-01");
 }
 
 TEST_CASE("formatting multiple arguments") {

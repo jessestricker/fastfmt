@@ -4,12 +4,19 @@
 #include <charconv>
 #include <climits>
 #include <concepts>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>
+
+namespace fastfmt::detail {
+  void ensure(bool cond, const char* desc, const char* file, int line) noexcept;
+}
+
+#define FASTFMT_DETAIL_ENSURE(cond__, desc__) ::fastfmt::detail::ensure(cond__, desc__, __FILE__, __LINE__)
 
 namespace fastfmt::detail {
   template <class T, class... Set>
@@ -24,7 +31,8 @@ namespace fastfmt::detail {
   template <class T>
   concept integer = signed_integer<T> || unsigned_integer<T>;
 
-  void ensure(bool cond, const char* desc) noexcept;
+  template <class T>
+  concept floating_point = one_of<T, float, double, long double>;
 
   class appendable_base {
   protected:
@@ -54,7 +62,7 @@ namespace fastfmt::detail {
       const auto buf_last = str.data() + str.size();
 
       const auto [str_end_ptr, ec] = std::to_chars(buf_first, buf_last, value_, base);
-      ensure(ec == std::errc{}, "buffer capacity exceeded");
+      FASTFMT_DETAIL_ENSURE(ec == std::errc{}, "buffer capacity exceeded");
 
       const auto str_new_size = str_end_ptr - str.data();
       str.resize(str_new_size);
@@ -104,6 +112,51 @@ namespace fastfmt::detail {
       if (is_signed && bits == 64 && base == 10) return 20;
       if (is_signed && bits == 64 && base == 16) return 17;
       throw std::invalid_argument{"unsupported type"};
+    }
+  };
+
+  template <floating_point Float>
+  class float_arg : public appendable_base {
+  public:
+    constexpr float_arg(Float value, std::chars_format format, unsigned precision) noexcept
+        : value_{value}, format_{format}, precision_{precision} {
+    }
+
+    void append_to(std::string& str) {
+      static constexpr std::size_t init_buffer_size = 32;
+      static constexpr std::size_t max_rounds = 3;
+
+      auto buf = std::string{};
+      buf.resize(init_buffer_size);
+
+      for (auto i = std::size_t{}; i < max_rounds; ++i) {
+        const auto [end_ptr, ec] = to_chars(buf);
+        if (ec == std::errc::value_too_large) {
+          // grow buffer and try again
+          buf.resize(buf.size() * 2);
+          continue;
+        }
+        FASTFMT_DETAIL_ENSURE(ec == std::errc{}, "unknown error from std::to_chars()");
+
+        str.append(buf.data(), end_ptr);
+        return;
+      }
+
+      // value does not fit into the buffer,
+      // even after 3 rounds of growing the buffer
+      FASTFMT_DETAIL_ENSURE(false, "buffer capacity exceeded");
+    }
+
+  private:
+    Float value_;
+    std::chars_format format_;
+    unsigned precision_;
+
+    auto to_chars(std::string& buf) {
+      if (precision_ == 0) {
+        return std::to_chars(buf.data(), buf.data() + buf.size(), value_, format_);
+      }
+      return std::to_chars(buf.data(), buf.data() + buf.size(), value_, format_, precision_);
     }
   };
 }

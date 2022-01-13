@@ -27,6 +27,16 @@ namespace fastfmt {
     return detail::integer_arg<Int, 16>{value};
   }
 
+  template <detail::floating_point Float>
+  constexpr auto fixed(Float value, unsigned precision = 0) {
+    return detail::float_arg<Float>{value, std::chars_format::fixed, precision};
+  }
+
+  template <detail::floating_point Float>
+  constexpr auto scientific(Float value, unsigned precision = 0) {
+    return detail::float_arg<Float>{value, std::chars_format::scientific, precision};
+  }
+
   class output {
   public:
     [[nodiscard]] std::string_view str() const noexcept;
@@ -47,6 +57,15 @@ namespace fastfmt {
     output& operator<<(Int i) {
       return *this << dec(i);
     }
+
+    // format floating point
+
+    template <detail::floating_point Float>
+    output& operator<<(Float f) {
+      return *this << detail::float_arg{f, std::chars_format::general, 0};
+    }
+
+    // format appendable args (see detail.hpp)
 
     template <detail::appendable Appendable>
     output& operator<<(Appendable appendable) {
