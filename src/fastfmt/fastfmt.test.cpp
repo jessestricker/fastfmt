@@ -40,47 +40,68 @@ TEST_CASE("formatting bool") {
   FASTFMT_CHECK(false, "false");
 }
 
-TEST_CASE("formatting unsigned integer, base 10") {
-  FASTFMT_CHECK(lim<std::uint8_t>::min(), "0");
-  FASTFMT_CHECK(lim<std::uint8_t>::max(), "255");
-  FASTFMT_CHECK(lim<std::uint16_t>::min(), "0");
-  FASTFMT_CHECK(lim<std::uint16_t>::max(), "65535");
-  FASTFMT_CHECK(lim<std::uint32_t>::min(), "0");
-  FASTFMT_CHECK(lim<std::uint32_t>::max(), "4294967295");
-  FASTFMT_CHECK(lim<std::uint64_t>::min(), "0");
-  FASTFMT_CHECK(lim<std::uint64_t>::max(), "18446744073709551615");
+TEMPLATE_TEST_CASE("format integer 0", "", std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t, std::int8_t,
+                   std::int16_t, std::int32_t, std::int64_t) {
+  FASTFMT_CHECK(ff::bin(TestType{0}), "0");
+  FASTFMT_CHECK(ff::oct(TestType{0}), "0");
+  FASTFMT_CHECK(ff::dec(TestType{0}), "0");
+  FASTFMT_CHECK(ff::hex(TestType{0}), "0");
 }
 
-TEST_CASE("formatting signed integer, base 10") {
-  FASTFMT_CHECK(lim<std::int8_t>::min(), "-128");
-  FASTFMT_CHECK(lim<std::int8_t>::max(), "127");
-  FASTFMT_CHECK(lim<std::int16_t>::min(), "-32768");
-  FASTFMT_CHECK(lim<std::int16_t>::max(), "32767");
-  FASTFMT_CHECK(lim<std::int32_t>::min(), "-2147483648");
-  FASTFMT_CHECK(lim<std::int32_t>::max(), "2147483647");
-  FASTFMT_CHECK(lim<std::int64_t>::min(), "-9223372036854775808");
-  FASTFMT_CHECK(lim<std::int64_t>::max(), "9223372036854775807");
-}
-
-TEST_CASE("formatting integer, base 2") {
-  FASTFMT_CHECK(ff::bin(lim<std::uint8_t>::min()), "0");
+TEST_CASE("format max length integers, uint8") {
   FASTFMT_CHECK(ff::bin(lim<std::uint8_t>::max()), "11111111");
-  FASTFMT_CHECK(ff::bin(lim<std::int8_t>::min()), "-10000000");
-  FASTFMT_CHECK(ff::bin(lim<std::int8_t>::max()), "1111111");
-}
-
-TEST_CASE("formatting integer, base 8") {
-  FASTFMT_CHECK(ff::oct(lim<std::uint8_t>::min()), "0");
   FASTFMT_CHECK(ff::oct(lim<std::uint8_t>::max()), "377");
-  FASTFMT_CHECK(ff::oct(lim<std::int8_t>::min()), "-200");
-  FASTFMT_CHECK(ff::oct(lim<std::int8_t>::max()), "177");
+  FASTFMT_CHECK(ff::dec(lim<std::uint8_t>::max()), "255");
+  FASTFMT_CHECK(ff::hex(lim<std::uint8_t>::max()), "ff");
 }
 
-TEST_CASE("formatting integer, base 16") {
-  FASTFMT_CHECK(ff::hex(lim<std::uint8_t>::min()), "0");
-  FASTFMT_CHECK(ff::hex(lim<std::uint8_t>::max()), "ff");
+TEST_CASE("format max length integers, uint16") {
+  FASTFMT_CHECK(ff::bin(lim<std::uint16_t>::max()), "1111111111111111");
+  FASTFMT_CHECK(ff::oct(lim<std::uint16_t>::max()), "177777");
+  FASTFMT_CHECK(ff::dec(lim<std::uint16_t>::max()), "65535");
+  FASTFMT_CHECK(ff::hex(lim<std::uint16_t>::max()), "ffff");
+}
+
+TEST_CASE("format max length integers, uint32") {
+  FASTFMT_CHECK(ff::bin(lim<std::uint32_t>::max()), "11111111111111111111111111111111");
+  FASTFMT_CHECK(ff::oct(lim<std::uint32_t>::max()), "37777777777");
+  FASTFMT_CHECK(ff::dec(lim<std::uint32_t>::max()), "4294967295");
+  FASTFMT_CHECK(ff::hex(lim<std::uint32_t>::max()), "ffffffff");
+}
+
+TEST_CASE("format max length integers, uint64") {
+  FASTFMT_CHECK(ff::bin(lim<std::uint64_t>::max()), "1111111111111111111111111111111111111111111111111111111111111111");
+  FASTFMT_CHECK(ff::oct(lim<std::uint64_t>::max()), "1777777777777777777777");
+  FASTFMT_CHECK(ff::dec(lim<std::uint64_t>::max()), "18446744073709551615");
+  FASTFMT_CHECK(ff::hex(lim<std::uint64_t>::max()), "ffffffffffffffff");
+}
+
+TEST_CASE("format max length integers, int8") {
+  FASTFMT_CHECK(ff::bin(lim<std::int8_t>::min()), "-10000000");
+  FASTFMT_CHECK(ff::oct(lim<std::int8_t>::min()), "-200");
+  FASTFMT_CHECK(ff::dec(lim<std::int8_t>::min()), "-128");
   FASTFMT_CHECK(ff::hex(lim<std::int8_t>::min()), "-80");
-  FASTFMT_CHECK(ff::hex(lim<std::int8_t>::max()), "7f");
+}
+
+TEST_CASE("format max length integers, int16") {
+  FASTFMT_CHECK(ff::bin(lim<std::int16_t>::min()), "-1000000000000000");
+  FASTFMT_CHECK(ff::oct(lim<std::int16_t>::min()), "-100000");
+  FASTFMT_CHECK(ff::dec(lim<std::int16_t>::min()), "-32768");
+  FASTFMT_CHECK(ff::hex(lim<std::int16_t>::min()), "-8000");
+}
+
+TEST_CASE("format max length integers, int32") {
+  FASTFMT_CHECK(ff::bin(lim<std::int32_t>::min()), "-10000000000000000000000000000000");
+  FASTFMT_CHECK(ff::oct(lim<std::int32_t>::min()), "-20000000000");
+  FASTFMT_CHECK(ff::dec(lim<std::int32_t>::min()), "-2147483648");
+  FASTFMT_CHECK(ff::hex(lim<std::int32_t>::min()), "-80000000");
+}
+
+TEST_CASE("format max length integers, int64") {
+  FASTFMT_CHECK(ff::bin(lim<std::int64_t>::min()), "-1000000000000000000000000000000000000000000000000000000000000000");
+  FASTFMT_CHECK(ff::oct(lim<std::int64_t>::min()), "-1000000000000000000000");
+  FASTFMT_CHECK(ff::dec(lim<std::int64_t>::min()), "-9223372036854775808");
+  FASTFMT_CHECK(ff::hex(lim<std::int64_t>::min()), "-8000000000000000");
 }
 
 TEMPLATE_TEST_CASE("formatting floating point, fixed", "", float, double, long double) {
