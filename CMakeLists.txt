@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 project(
   fastfmt
-  VERSION 0.2.0
+  VERSION 0.4.0
   LANGUAGES CXX)
 
 # disallow in-source builds
