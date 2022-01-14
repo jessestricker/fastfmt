@@ -14,22 +14,22 @@ namespace fastfmt {
 
   template <detail::integer Int>
   constexpr auto bin(Int value) noexcept {
-    return detail::int_output_arg<Int>{.value = value, .base = 2};
+    return detail::int_output_arg<Int, 2>{.value = value};
   }
 
   template <detail::integer Int>
   constexpr auto oct(Int value) noexcept {
-    return detail::int_output_arg<Int>{.value = value, .base = 8};
+    return detail::int_output_arg<Int, 8>{.value = value};
   }
 
   template <detail::integer Int>
   constexpr auto dec(Int value) noexcept {
-    return detail::int_output_arg<Int>{.value = value, .base = 10};
+    return detail::int_output_arg<Int, 10>{.value = value};
   }
 
   template <detail::integer Int>
   constexpr auto hex(Int value) noexcept {
-    return detail::int_output_arg<Int>{.value = value, .base = 16};
+    return detail::int_output_arg<Int, 16>{.value = value};
   }
 
   /*
