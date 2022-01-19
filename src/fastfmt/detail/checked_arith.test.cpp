@@ -1,25 +1,36 @@
 #include "checked_arith.hpp"
 
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <doctest/doctest.h>
 
-template <class T>
-using lim = std::numeric_limits<T>;
-namespace ffd = fastfmt::detail;
+using namespace fastfmt::detail;
 
-TEMPLATE_TEST_CASE("checked add, valid", "", std::uint8_t) {
-  CHECK(ffd::checked_add(TestType{1}, TestType{0}) == TestType{1});
-  CHECK(ffd::checked_add(TestType{0}, TestType{1}) == TestType{1});
+TEST_SUITE("checked arithmetic") {
+  TEST_CASE_TEMPLATE("addition", T, std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    using limits = std::numeric_limits<T>;
+    CHECK(checked_add(T{1}, T{0}) == T{1});
+    CHECK(checked_add(T{0}, T{1}) == T{1});
 
-  CHECK(ffd::checked_add(TestType{lim<TestType>::max() - 1}, TestType{1}) == lim<TestType>::max());
-  CHECK(ffd::checked_add(TestType{1}, TestType{lim<TestType>::max() - 1}) == lim<TestType>::max());
-}
+    CHECK(checked_add(T{limits::max() - 1}, T{1}) == limits::max());
+    CHECK(checked_add(T{1}, T{limits::max() - 1}) == limits::max());
 
-TEMPLATE_TEST_CASE("checked add, invalid", "", std::uint8_t) {
-  CHECK_THROWS_AS(ffd::checked_add(lim<TestType>::max(), TestType{1}), std::domain_error);
-  CHECK_THROWS_AS(ffd::checked_add(TestType{1}, lim<TestType>::max()), std::domain_error);
+    CHECK_THROWS_AS(checked_add(limits::max(), T{1}), std::domain_error);
+    CHECK_THROWS_AS(checked_add(T{1}, limits::max()), std::domain_error);
+  }
 
-  CHECK_THROWS_AS(ffd::checked_add(lim<TestType>::max(), lim<TestType>::max()), std::domain_error);
+  TEST_CASE_TEMPLATE("multiplication", T, std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    using limits = std::numeric_limits<T>;
+    CHECK(checked_mul(T{2}, T{3}) == T{6});
+    CHECK(checked_mul(T{3}, T{2}) == T{6});
+
+    static constexpr auto max_sqrt = static_cast<T>((T{1} << (limits::digits / 2)));
+    static constexpr auto max_sqrt_m1 = T{max_sqrt - 1};
+    CHECK(checked_mul(max_sqrt, max_sqrt_m1) <= limits::max());
+    CHECK(checked_mul(max_sqrt_m1, max_sqrt) <= limits::max());
+
+    CHECK_THROWS_AS(checked_mul(max_sqrt, max_sqrt), std::domain_error);
+  }
 }
